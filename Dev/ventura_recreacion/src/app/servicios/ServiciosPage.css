@@ -1,0 +1,53 @@
+/* app/servicios/ServiciosPage.css */
+.servicios-page {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+  }
+  
+  .servicios-page h1 {
+    text-align: center;
+    color: #2c3e50;
+    margin-bottom: 2rem;
+  }
+  
+  .servicios-grid {
+    display: grid;
+    gap: 2rem;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  }
+  
+  .servicio-card {
+    background: white;
+    border-radius: 8px;
+    padding: 2rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease;
+  }
+  
+  .servicio-card:hover {
+    transform: translateY(-5px);
+  }
+  
+  .servicio-precio {
+    color: #27ae60;
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 1.5rem 0;
+  }
+  
+  .boton-primario {
+    display: block;
+    width: 100%;
+    padding: 1rem;
+    background: #27ae60;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+  }
+  
+  .boton-primario:hover {
+    background: #219a52;
+  }

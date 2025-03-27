@@ -1,0 +1,46 @@
+/* app/agenda/AgendaPage.css */
+.agenda-page {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+  }
+  
+  .agenda-page h1 {
+    text-align: center;
+    color: #2c3e50;
+    margin-bottom: 2rem;
+  }
+  
+  .eventos-container {
+    display: grid;
+    gap: 1.5rem;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  }
+  
+  .evento-card {
+    background: white;
+    border-radius: 8px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  }
+  
+  .evento-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+  }
+  
+  .evento-fecha {
+    color: #27ae60;
+    font-weight: 600;
+  }
+  
+  .evento-hora {
+    color: #666;
+    font-size: 0.9rem;
+  }
+  
+  .evento-ubicacion {
+    color: #666;
+    margin-top: 0.5rem;
+  }
