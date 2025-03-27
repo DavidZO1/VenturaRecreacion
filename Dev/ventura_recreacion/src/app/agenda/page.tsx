@@ -1,4 +1,6 @@
 // app/agenda/page.tsx
+import "./AgendaPage.css";
+
 export default function Agenda() {
   const eventos = [
     {
@@ -16,34 +18,20 @@ export default function Agenda() {
   ];
 
   return (
-    <div className="container">
-      <h1 className="section-title">Agenda de Eventos</h1>
-      <div className="calendar">
+    <div className="agenda-page">
+      <h1>Agenda de Eventos</h1>
+      <div className="eventos-container">
         {eventos.map((evento, index) => (
-          <div key={index} className="card event-card">
-            <div className="event-date">{evento.fecha}</div>
-            <div className="event-time">{evento.hora}</div>
+          <div key={index} className="evento-card">
+            <div className="evento-header">
+              <span className="evento-fecha">{evento.fecha}</span>
+              <span className="evento-hora">{evento.hora}</span>
+            </div>
             <h3>{evento.tipo}</h3>
-            <p>{evento.ubicacion}</p>
+            <p className="evento-ubicacion">{evento.ubicacion}</p>
           </div>
         ))}
       </div>
-      <style jsx>{`
-        .calendar {
-          display: grid;
-          gap: 1.5rem;
-        }
-        
-        .event-date {
-          font-weight: 600;
-          color: #27ae60;
-        }
-        
-        .event-time {
-          color: #666;
-          font-size: 0.9rem;
-        }
-      `}</style>
     </div>
   );
 }
