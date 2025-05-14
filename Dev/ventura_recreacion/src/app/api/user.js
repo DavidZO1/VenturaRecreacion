@@ -1,6 +1,6 @@
 // src/app/api/user.js
-export const registerUser  = async (userData) => {
-    const response = await fetch('http://localhost:5000/api/register', {
+export const registerUser = async (userData) => {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/register`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -10,14 +10,36 @@ export const registerUser  = async (userData) => {
     return response.json();
 };
 
-// src/app/api/payment.js
-export const createPaymentIntent = async (amount) => {
-    const response = await fetch('http://localhost:5000/api/create-payment-intent', {
+export const loginUser = async (credentials) => {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/login`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ amount }),
+        body: JSON.stringify(credentials),
+    });
+    return response.json();
+};
+
+export const getUserProfile = async (token) => {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/profile`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        },
+    });
+    return response.json();
+};
+
+export const updateAvailability = async (userId, availabilityData, token) => {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/${userId}/availability`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(availabilityData),
     });
     return response.json();
 };
