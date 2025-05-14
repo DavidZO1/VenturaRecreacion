@@ -1,15 +1,13 @@
 // backend/models/User.js
+const mongoose = require('mongoose'); // Agrega esta línea
+
 const userSchema = new mongoose.Schema({
     name: { type: String, required: true },
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
     availability: { type: [String], default: [] },
-    incentives: { type: Number, default: 0 }, // Campo para incentivos
+    incentives: { type: Number, default: 0 },
 });
 
-// backend/userRoutes.js
-router.put('/:id/incentives', async (req, res) => {
-    const { incentives } = req.body;
-    const user = await User.findByIdAndUpdate(req.params.id, { incentives }, { new: true });
-    res.send(user);
-});
+// Agrega esto para exportar el modelo
+module.exports = mongoose.model('User', userSchema);
