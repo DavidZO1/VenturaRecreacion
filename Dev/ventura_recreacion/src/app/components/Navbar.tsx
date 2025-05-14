@@ -1,20 +1,33 @@
+// components/Navbar.tsx
 "use client";
-import "./Navbar.css";
+import Link from 'next/link';
+import { useAuth } from '../context/AuthContext';
 
 export default function Navbar() {
-  return (
-    <header className="navbar">
-      <div className="navbar-container">
-        <h1 className="logo">Ventura Recreación</h1>
-        <nav>
-          <ul className="nav-menu">
-            <li><a href="/">Inicio</a></li>
-            <li><a href="/servicios">Servicios</a></li>
-            <li><a href="/agenda">Agenda</a></li>
-            <li><a href="/pagos">Pagos</a></li>
-          </ul>
-        </nav>
-      </div>
-    </header>
-  );
+    const { user, logout } = useAuth();
+
+    return (
+        <header className="navbar">
+            <div className="navbar-container">
+                <Link href="/" className="logo">Ventura Recreación</Link>
+                <nav>
+                    <ul className="nav-menu">
+                        {user ? (
+                            <>
+                                <li><Link href="/perfil">Perfil</Link></li>
+                                <li><button onClick={logout}>Cerrar Sesión</button></li>
+                            </>
+                        ) : (
+                            <>
+                                <li><Link href="/login">Iniciar Sesión</Link></li>
+                                <li><Link href="/registro">Registro</Link></li>
+                            </>
+                        )}
+                        <li><Link href="/eventos">Eventos</Link></li>
+                        <li><Link href="/pagos">Pagos</Link></li>
+                    </ul>
+                </nav>
+            </div>
+        </header>
+    );
 }
