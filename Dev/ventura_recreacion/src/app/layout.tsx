@@ -6,10 +6,6 @@ import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import { AuthProvider } from "./context/AuthContext";
 
-export const metadata = {
-  title: "Ventura Recreación",
-  description: "Plataforma de gestión de eventos",
-};
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
