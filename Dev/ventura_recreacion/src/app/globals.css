@@ -1,28 +1,89 @@
-body {
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+
+:root {
+  --color-primary: #FFD700; /* Amarillo */
+  --color-secondary: #0057B8; /* Azul */
+  --color-dark: #000000; /* Negro */
+  --color-light: #FFFFFF; /* Blanco */
+  --color-gray: #f4f4f4;
+
+  --font-main: 'Inter', sans-serif;
+  --transition: all 0.3s ease-in-out;
+  --border-radius: 12px;
+  --shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+* {
+  box-sizing: border-box;
+  padding: 0;
   margin: 0;
-  font-family: 'Segoe UI', system-ui, sans-serif;
+  font-family: var(--font-main);
+}
+
+body {
+  background-color: var(--color-light);
+  color: var(--color-dark);
   line-height: 1.6;
+  transition: var(--transition);
+}
+
+a {
+  color: var(--color-secondary);
+  text-decoration: none;
+  transition: var(--transition);
+}
+
+a:hover {
+  opacity: 0.8;
+}
+
+button {
+  font-family: var(--font-main);
+  cursor: pointer;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--border-radius);
+  background-color: var(--color-primary);
+  color: var(--color-dark);
+  font-weight: 600;
+  transition: var(--transition);
+}
+
+button:hover {
+  background-color: var(--color-secondary);
+  color: var(--color-light);
+}
+
+input, textarea, select {
+  padding: 0.75rem;
+  border-radius: var(--border-radius);
+  border: 1px solid #ccc;
+  width: 100%;
+  margin-top: 0.5rem;
+  transition: var(--transition);
+}
+
+input:focus, textarea:focus, select:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.2);
+}
+
+.container {
+  width: 90%;
+  max-width: 1200px;
+  margin: auto;
+  padding: 2rem 0;
+}
+
+body {
+  background: linear-gradient(to bottom, #fffdf0, #c2d2ff);
   min-height: 100vh;
-  display: flex;
-  flex-direction: column;
+  font-family: sans-serif;
+  margin: 0;
+  padding: 0;
 }
 
 .main-content {
-  flex: 1;
-  padding-top: 80px;
-}
-
-/* Estilos base para headings */
-h1, h2, h3 {
-  color: #2c3e50;
-  margin: 0 0 1rem;
-}
-
-h1 { font-size: 2.5rem; }
-h2 { font-size: 2rem; }
-h3 { font-size: 1.5rem; }
-
-a {
-  color: inherit;
-  text-decoration: none;
+  padding-top: 200px; 
 }

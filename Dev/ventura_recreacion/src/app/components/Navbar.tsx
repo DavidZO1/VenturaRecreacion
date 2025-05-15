@@ -1,5 +1,6 @@
 // components/Navbar.tsx
 "use client";
+import './Navbar.css';
 import Link from 'next/link';
 import { useAuth } from '../context/AuthContext';
 
@@ -9,7 +10,11 @@ export default function Navbar() {
     return (
         <header className="navbar">
             <div className="navbar-container">
-                <Link href="/" className="logo">Ventura Recreación</Link>
+                <Link href="/" className="logo" aria-label="Inicio">
+  <img src="/logo.png" alt="Logo Ventura" className="logo-image" />
+</Link>
+
+
                 <nav>
                     <ul className="nav-menu">
                         {user ? (
