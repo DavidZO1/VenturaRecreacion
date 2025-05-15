@@ -36,8 +36,10 @@ app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
 
-// Habilitar CORS para todas las rutas
+// backend/server.js
 app.use(cors({
-  origin: 'http://localhost:3000', // URL de tu frontend
+  origin: ['http://localhost:3000'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true
 }));

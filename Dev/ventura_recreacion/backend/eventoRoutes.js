@@ -52,14 +52,12 @@ router.get('/:id', async (req, res) => {
 });
 
 // Crear un nuevo evento
+// backend/eventoRoutes.js
 router.post('/', auth, async (req, res) => {
   try {
-    // Aseguramos que el usuario es el mismo que está autenticado
     const eventoData = { ...req.body, usuario: req.userId };
-    
     const nuevoEvento = new Evento(eventoData);
     const eventoGuardado = await nuevoEvento.save();
-    
     res.status(201).json(eventoGuardado);
   } catch (error) {
     res.status(400).json({ message: error.message });

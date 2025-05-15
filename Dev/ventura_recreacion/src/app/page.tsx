@@ -9,8 +9,6 @@ export default function HomePage() {
     <>
       <Hero />
       <ServicesPreview />
-      <AgendaPreview />
-      <PaymentsPreview />
     </>
   );
 }

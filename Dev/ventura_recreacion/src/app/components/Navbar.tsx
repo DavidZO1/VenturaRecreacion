@@ -29,6 +29,7 @@ export default function Navbar() {
                             </>
                         )}
                         <li><Link href="/eventos">Eventos</Link></li>
+                        <li><Link href="/servicios">Servicios</Link></li>                        
                         <li><Link href="/pagos">Pagos</Link></li>
                     </ul>
                 </nav>

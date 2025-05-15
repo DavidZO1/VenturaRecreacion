@@ -68,19 +68,18 @@ export const fetchEvento = async (id) => {
 };
 
 export const createEvento = async (eventoData, token) => {
-    if (!token) {
-        throw new Error('No token provided');
-    }
-    
-    try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/eventos`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify(eventoData),
-        });
+  try {
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/api/eventos`, // Ruta correcta
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(eventoData)
+      }
+    );
         
         if (!response.ok) {
             const errorData = await response.json();
