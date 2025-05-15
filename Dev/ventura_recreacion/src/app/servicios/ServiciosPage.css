@@ -30,7 +30,7 @@
   }
   
   .servicio-precio {
-    color: #27ae60;
+    color: #000000;
     font-size: 1.5rem;
     font-weight: 700;
     margin: 1.5rem 0;
@@ -40,8 +40,8 @@
     display: block;
     width: 100%;
     padding: 1rem;
-    background: #27ae60;
-    color: white;
+    background-color: rgb(255, 215, 0);
+    color: rgb(0, 0, 0);
     border: none;
     border-radius: 5px;
     cursor: pointer;
@@ -49,5 +49,6 @@
   }
   
   .boton-primario:hover {
-    background: #219a52;
+     background-color: #e0bb00;
+  transform: scale(1.05);
   }
