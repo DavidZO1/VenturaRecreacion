@@ -148,4 +148,14 @@ router.put('/:id/availability', auth, async (req, res) => {
   }
 });
 
+// Agrega esta nueva ruta:
+router.get('/', async (req, res) => {
+  try {
+    const users = await User.find().select('-password'); // Excluir contraseñas
+    res.json(users);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
 module.exports = router;

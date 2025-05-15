@@ -8,6 +8,7 @@ type User = {
     email: string;
     availability: string[];
     token: string;
+    createdAt: string;
 };
 
 type AuthContextType = {

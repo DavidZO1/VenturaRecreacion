@@ -1,4 +1,4 @@
-// backend/payment.js
+// backend/payment.js - Versión corregida
 require('dotenv').config();
 const express = require('express');
 const Stripe = require('stripe');
@@ -33,7 +33,7 @@ router.post('/create-payment-intent', auth, async (req, res) => {
 
     // Crear intento de pago
     const paymentIntent = await stripe.paymentIntents.create({
-      amount: Math.round(amount * 100), // Convertir a centavos
+      amount: Math.round(amount), // Ya está en centavos
       currency: 'mxn', // Usando pesos mexicanos
       metadata: {
         userId: req.userId,

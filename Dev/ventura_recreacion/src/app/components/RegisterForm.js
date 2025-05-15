@@ -1,66 +1,109 @@
-// components/RegisterForm.js
+// components/RegisterForm.jsx
+"use client";
 import { useState } from 'react';
+import { useAuth } from '../context/AuthContext';
+import { useRouter } from 'next/navigation';
 
 export default function RegisterForm() {
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
     const [error, setError] = useState('');
+    const [loading, setLoading] = useState(false);
+    const { register } = useAuth();
+    const router = useRouter();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        
+        // Validaciones básicas
+        if (password !== confirmPassword) {
+            setError('Las contraseñas no coinciden');
+            return;
+        }
+        
+        if (password.length < 6) {
+            setError('La contraseña debe tener al menos 6 caracteres');
+            return;
+        }
+        
+        setError('');
+        setLoading(true);
+        
         try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/register`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name, email, password })
-            });
-
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.message || 'Registration failed');
-            }
-
-            const user = await response.json();
-            console.log('Registration successful:', user);
-            // Redirigir o actualizar estado global aquí
+            await register(name, email, password);
+            router.push('/perfil'); // Redirigir al perfil después del registro exitoso
         } catch (err) {
-            setError(err.message);
+            setError(err.message || 'Error al registrarse. Inténtalo de nuevo.');
+        } finally {
+            setLoading(false);
         }
     };
 
     return (
-        <form onSubmit={handleSubmit} className="max-w-md mx-auto p-4">
-            {error && <p className="text-red-500 mb-2">{error}</p>}
-            <input
-                type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="Nombre"
-                className="w-full mb-2 p-2 border rounded"
-                required
-            />
-            <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="Email"
-                className="w-full mb-2 p-2 border rounded"
-                required
-            />
-            <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Contraseña"
-                className="w-full mb-2 p-2 border rounded"
-                required
-            />
+        <form onSubmit={handleSubmit} className="max-w-md mx-auto p-4 bg-white shadow-md rounded">
+            {error && <p className="text-red-500 mb-4 text-sm">{error}</p>}
+            
+            <div className="mb-4">
+                <label htmlFor="name" className="block text-gray-700 mb-2">Nombre completo</label>
+                <input
+                    type="text"
+                    id="name"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="Nombre completo"
+                    className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-green-500"
+                    required
+                />
+            </div>
+            
+            <div className="mb-4">
+                <label htmlFor="email" className="block text-gray-700 mb-2">Email</label>
+                <input
+                    type="email"
+                    id="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="correo@ejemplo.com"
+                    className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-green-500"
+                    required
+                />
+            </div>
+            
+            <div className="mb-4">
+                <label htmlFor="password" className="block text-gray-700 mb-2">Contraseña</label>
+                <input
+                    type="password"
+                    id="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Contraseña"
+                    className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-green-500"
+                    required
+                />
+            </div>
+            
+            <div className="mb-6">
+                <label htmlFor="confirmPassword" className="block text-gray-700 mb-2">Confirmar contraseña</label>
+                <input
+                    type="password"
+                    id="confirmPassword"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    placeholder="Confirmar contraseña"
+                    className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-green-500"
+                    required
+                />
+            </div>
+            
             <button
                 type="submit"
-                className="w-full bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700"
+                disabled={loading}
+                className={`w-full bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700 transition 
+                ${loading ? 'opacity-70 cursor-not-allowed' : ''}`}
             >
-                Registrarse
+                {loading ? 'Registrando...' : 'Registrarse'}
             </button>
         </form>
     );

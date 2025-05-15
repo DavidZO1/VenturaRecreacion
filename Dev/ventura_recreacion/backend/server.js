@@ -35,3 +35,9 @@ app.use('/api/eventos', eventoRoutes); // Nueva ruta para eventos
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
+
+// Habilitar CORS para todas las rutas
+app.use(cors({
+  origin: 'http://localhost:3000', // URL de tu frontend
+  credentials: true
+}));
