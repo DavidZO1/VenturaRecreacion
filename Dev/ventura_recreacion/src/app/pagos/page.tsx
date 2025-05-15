@@ -53,7 +53,9 @@ export default function Pagos() {
                 <option value={1000}>$10.000</option>
                 <option value={5000}>$50.000</option>
                 <option value={10000}>$100.000</option>
-                <option value={50000}>$500.000</option>
+                <option value={50000}>$1.000.000</option>
+                <option value={50000}>$1.200.000</option>
+                <option value={50000}>$1.500.000</option>
               </select>
             </div>
             
