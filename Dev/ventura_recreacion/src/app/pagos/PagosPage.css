@@ -35,8 +35,8 @@
   display: block;
   width: 100%;
   padding: 1rem;
-  background: #27ae60;
-  color: white;
+  background-color: rgb(255, 215, 0);
+  color: rgb(0, 0, 0);
   border: none;
   border-radius: 5px;
   margin-top: 1.5rem;
@@ -45,7 +45,8 @@
 }
 
 .boton-primario:hover {
-  background: #219a52;
+  background-color: #e0bb00;
+  transform: scale(1.05);
 }
 
 .boton-secundario {
