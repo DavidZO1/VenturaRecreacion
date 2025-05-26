@@ -1,11 +1,19 @@
-// src/app/api/eventos.js
-export const fetchEventos = async () => {
+// src/app/api/eventos-api.js
+
+// Obtener todos los eventos (solo para admins) o eventos públicos (para usuarios)
+export const fetchEventos = async (token) => {
     try {
+        const headers = {
+            'Content-Type': 'application/json',
+        };
+        
+        if (token) {
+            headers['Authorization'] = `Bearer ${token}`;
+        }
+        
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/eventos`, {
             method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-            },
+            headers
         });
         
         if (!response.ok) {
@@ -20,6 +28,7 @@ export const fetchEventos = async () => {
     }
 };
 
+// Obtener eventos del usuario autenticado
 export const fetchMisEventos = async (token) => {
     if (!token) {
         throw new Error('No token provided');
@@ -46,13 +55,74 @@ export const fetchMisEventos = async (token) => {
     }
 };
 
-export const fetchEvento = async (id) => {
+// Obtener eventos pendientes (solo para admins)
+export const fetchEventosPendientes = async (token) => {
+    if (!token) {
+        throw new Error('No token provided');
+    }
+    
     try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/eventos/${id}`, {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/eventos/pendientes`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
             },
+        });
+        
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Error al obtener eventos pendientes');
+        }
+        
+        return response.json();
+    } catch (error) {
+        console.error('Error fetching eventos pendientes:', error);
+        throw error;
+    }
+};
+
+// Obtener agenda por mes (solo para admins)
+export const fetchAgendaMensual = async (year, month, token) => {
+    if (!token) {
+        throw new Error('No token provided');
+    }
+    
+    try {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/eventos/agenda/${year}/${month}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+        });
+        
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Error al obtener agenda mensual');
+        }
+        
+        return response.json();
+    } catch (error) {
+        console.error('Error fetching agenda mensual:', error);
+        throw error;
+    }
+};
+
+// Obtener un evento específico
+export const fetchEvento = async (id, token) => {
+    try {
+        const headers = {
+            'Content-Type': 'application/json',
+        };
+        
+        if (token) {
+            headers['Authorization'] = `Bearer ${token}`;
+        }
+        
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/eventos/${id}`, {
+            method: 'GET',
+            headers
         });
         
         if (!response.ok) {
@@ -67,19 +137,21 @@ export const fetchEvento = async (id) => {
     }
 };
 
+// Crear un nuevo evento
 export const createEvento = async (eventoData, token) => {
-  try {
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/api/eventos`, // Ruta correcta
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(eventoData)
-      }
-    );
+    if (!token) {
+        throw new Error('No token provided');
+    }
+    
+    try {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/eventos`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify(eventoData)
+        });
         
         if (!response.ok) {
             const errorData = await response.json();
@@ -93,6 +165,90 @@ export const createEvento = async (eventoData, token) => {
     }
 };
 
+// Aprobar un evento (solo para admins)
+export const aprobarEvento = async (id, precio, notas, token) => {
+    if (!token) {
+        throw new Error('No token provided');
+    }
+    
+    try {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/eventos/${id}/aprobar`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ precio, notas }),
+        });
+        
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Error al aprobar evento');
+        }
+        
+        return response.json();
+    } catch (error) {
+        console.error(`Error aprobando evento ${id}:`, error);
+        throw error;
+    }
+};
+
+// Rechazar un evento (solo para admins)
+export const rechazarEvento = async (id, motivoRechazo, token) => {
+    if (!token) {
+        throw new Error('No token provided');
+    }
+    
+    try {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/eventos/${id}/rechazar`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ motivoRechazo }),
+        });
+        
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Error al rechazar evento');
+        }
+        
+        return response.json();
+    } catch (error) {
+        console.error(`Error rechazando evento ${id}:`, error);
+        throw error;
+    }
+};
+
+// Marcar evento como pagado (solo para admins)
+export const marcarEventoPagado = async (id, token) => {
+    if (!token) {
+        throw new Error('No token provided');
+    }
+    
+    try {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/eventos/${id}/marcar-pagado`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+        });
+        
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Error al marcar evento como pagado');
+        }
+        
+        return response.json();
+    } catch (error) {
+        console.error(`Error marcando evento ${id} como pagado:`, error);
+        throw error;
+    }
+};
+
+// Actualizar un evento
 export const updateEvento = async (id, eventoData, token) => {
     if (!token) {
         throw new Error('No token provided');
@@ -120,6 +276,7 @@ export const updateEvento = async (id, eventoData, token) => {
     }
 };
 
+// Eliminar un evento
 export const deleteEvento = async (id, token) => {
     if (!token) {
         throw new Error('No token provided');
