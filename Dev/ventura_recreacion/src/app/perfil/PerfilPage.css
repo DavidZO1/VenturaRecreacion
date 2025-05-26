@@ -1,0 +1,80 @@
+.perfil-page {
+  min-height: 70vh;
+  background: #f2f5f9;
+  padding: 1rem 1rem 2rem;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start; 
+}
+
+
+.perfil-container {
+  background: #fff;
+  border-radius: 16px;
+  padding: 2.5rem;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
+  max-width: 600px;
+  width: 100%;
+}
+
+.perfil-titulo {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #2c3e50;
+  margin-bottom: 2rem;
+  text-align: center;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 1rem;
+}
+
+.perfil-item {
+  margin-bottom: 1.5rem;
+}
+
+.perfil-label {
+  font-size: 0.9rem;
+  color: #888;
+  margin-bottom: 0.3rem;
+  display: block;
+  font-weight: 600;
+}
+
+.perfil-dato {
+  font-size: 1.1rem;
+  color: #333;
+}
+
+.perfil-botones {
+  margin-top: 2rem;
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+}
+
+.perfil-btn {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.perfil-btn.logout {
+  background: #e74c3c;
+  color: white;
+}
+
+.perfil-btn.logout:hover {
+  background: #c0392b;
+}
+
+.perfil-btn.eventos {
+  background-color: rgb(255, 215, 0);
+  color: rgb(0, 0, 0);
+}
+
+.perfil-btn.eventos:hover {
+  background-color: #e0bb00;
+}
