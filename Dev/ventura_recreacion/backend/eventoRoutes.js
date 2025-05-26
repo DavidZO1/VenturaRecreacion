@@ -1,4 +1,4 @@
-// backend/eventoRoutes.js
+// backend/eventoRoutes.js - VERSIÓN CORREGIDA
 const express = require('express');
 const Evento = require('./models/Evento');
 const User = require('./models/User');
@@ -19,6 +19,7 @@ const auth = async (req, res, next) => {
     req.userRole = user.role;
     next();
   } catch (error) {
+    console.error('Auth error:', error);
     res.status(401).json({ message: 'Invalid token' });
   }
 };
@@ -51,6 +52,7 @@ router.get('/', auth, async (req, res) => {
     
     res.json(eventos);
   } catch (error) {
+    console.error('Error fetching eventos:', error);
     res.status(500).json({ message: error.message });
   }
 });
@@ -63,30 +65,40 @@ router.get('/mis-eventos', auth, async (req, res) => {
       .sort({ fecha: 1 });
     res.json(eventos);
   } catch (error) {
+    console.error('Error fetching mis eventos:', error);
     res.status(500).json({ message: error.message });
   }
 });
 
-// Obtener eventos pendientes (solo para admins)
+// Obtener eventos pendientes (solo para admins) - CORREGIDO
 router.get('/pendientes', auth, isAdmin, async (req, res) => {
   try {
+    console.log('Fetching eventos pendientes for admin:', req.userId);
+    
     const eventos = await Evento.find({ estado: 'pendiente' })
       .populate('usuario', 'name email')
       .sort({ createdAt: 1 });
+    
+    console.log(`Found ${eventos.length} eventos pendientes`);
     res.json(eventos);
   } catch (error) {
+    console.error('Error fetching eventos pendientes:', error);
     res.status(500).json({ message: error.message });
   }
 });
 
-// Obtener eventos por mes (para agenda del admin)
+// Obtener eventos por mes (para agenda del admin) - CORREGIDO
 router.get('/agenda/:year/:month', auth, isAdmin, async (req, res) => {
   try {
     const { year, month } = req.params;
     
+    console.log(`Fetching agenda for ${year}-${month}`);
+    
     // Crear fechas de inicio y fin del mes
     const startDate = new Date(parseInt(year), parseInt(month) - 1, 1);
     const endDate = new Date(parseInt(year), parseInt(month), 0, 23, 59, 59);
+    
+    console.log('Date range:', startDate, 'to', endDate);
     
     const eventos = await Evento.find({
       fecha: { $gte: startDate, $lte: endDate },
@@ -95,13 +107,15 @@ router.get('/agenda/:year/:month', auth, isAdmin, async (req, res) => {
     .populate('usuario', 'name email')
     .sort({ fecha: 1 });
     
+    console.log(`Found ${eventos.length} eventos in agenda`);
     res.json(eventos);
   } catch (error) {
+    console.error('Error fetching agenda:', error);
     res.status(500).json({ message: error.message });
   }
 });
 
-// Obtener un evento específico
+// Obtener un evento específico - CORREGIDO
 router.get('/:id', auth, async (req, res) => {
   try {
     const evento = await Evento.findById(req.params.id)
@@ -119,13 +133,17 @@ router.get('/:id', auth, async (req, res) => {
     
     res.json(evento);
   } catch (error) {
+    console.error('Error fetching evento:', error);
     res.status(500).json({ message: error.message });
   }
 });
 
-// Crear un nuevo evento
+// Crear un nuevo evento - CORREGIDO
 router.post('/', auth, async (req, res) => {
   try {
+    console.log('Creating new evento for user:', req.userId);
+    console.log('Evento data:', req.body);
+    
     const eventoData = { 
       ...req.body, 
       usuario: req.userId,
@@ -135,19 +153,24 @@ router.post('/', auth, async (req, res) => {
     const nuevoEvento = new Evento(eventoData);
     const eventoGuardado = await nuevoEvento.save();
     
+    console.log('Evento created with ID:', eventoGuardado._id);
+    
     // Poblar los datos del usuario para la respuesta
     await eventoGuardado.populate('usuario', 'name email');
     
     res.status(201).json(eventoGuardado);
   } catch (error) {
+    console.error('Error creating evento:', error);
     res.status(400).json({ message: error.message });
   }
 });
 
-// Aprobar un evento (solo para admins)
+// Aprobar un evento (solo para admins) - CORREGIDO
 router.patch('/:id/aprobar', auth, isAdmin, async (req, res) => {
   try {
     const { precio, notas } = req.body;
+    
+    console.log(`Admin ${req.userId} approving evento ${req.params.id}`);
     
     const evento = await Evento.findById(req.params.id);
     if (!evento) {
@@ -170,123 +193,65 @@ router.patch('/:id/aprobar', auth, isAdmin, async (req, res) => {
       { new: true }
     ).populate('usuario', 'name email').populate('aprobadoPor', 'name');
     
+    console.log('Evento approved successfully');
     res.json(eventoActualizado);
   } catch (error) {
+    console.error('Error approving evento:', error);
     res.status(400).json({ message: error.message });
   }
 });
 
-// Rechazar un evento (solo para admins)
+// Rechazar un evento (solo para admins) - CORREGIDO
 router.patch('/:id/rechazar', auth, isAdmin, async (req, res) => {
   try {
     const { motivoRechazo } = req.body;
-    
+
+    console.log(`Admin ${req.userId} rejecting evento ${req.params.id}`);
+
     const evento = await Evento.findById(req.params.id);
     if (!evento) {
       return res.status(404).json({ message: 'Evento no encontrado' });
     }
-    
+
     if (evento.estado !== 'pendiente') {
       return res.status(400).json({ message: 'Solo se pueden rechazar eventos pendientes' });
     }
-    
+
     const eventoActualizado = await Evento.findByIdAndUpdate(
       req.params.id,
       {
         estado: 'rechazado',
         fechaRechazo: new Date(),
-        motivoRechazo: motivoRechazo || 'No especificado'
+        motivoRechazo: motivoRechazo || 'Sin motivo especificado',
       },
       { new: true }
     ).populate('usuario', 'name email');
-    
+
+    console.log('Evento rechazado correctamente');
     res.json(eventoActualizado);
   } catch (error) {
+    console.error('Error rechazando evento:', error);
     res.status(400).json({ message: error.message });
   }
 });
 
-// Marcar evento como pagado (solo para admins)
-router.patch('/:id/marcar-pagado', auth, isAdmin, async (req, res) => {
-  try {
-    const evento = await Evento.findById(req.params.id);
-    if (!evento) {
-      return res.status(404).json({ message: 'Evento no encontrado' });
-    }
-    
-    if (evento.estado !== 'aprobado') {
-      return res.status(400).json({ message: 'Solo se pueden marcar como pagados eventos aprobados' });
-    }
-    
-    const eventoActualizado = await Evento.findByIdAndUpdate(
-      req.params.id,
-      {
-        estado: 'pagado',
-        pagado: true,
-        fechaPago: new Date()
-      },
-      { new: true }
-    ).populate('usuario', 'name email');
-    
-    res.json(eventoActualizado);
-  } catch (error) {
-    res.status(400).json({ message: error.message });
-  }
-});
-
-// Actualizar un evento (solo el dueño puede editar eventos pendientes)
-router.put('/:id', auth, async (req, res) => {
-  try {
-    const evento = await Evento.findById(req.params.id);
-    
-    if (!evento) {
-      return res.status(404).json({ message: 'Evento no encontrado' });
-    }
-    
-    // Solo el dueño puede editar
-    if (evento.usuario.toString() !== req.userId) {
-      return res.status(403).json({ message: 'No autorizado para modificar este evento' });
-    }
-    
-    // Solo se pueden editar eventos pendientes
-    if (evento.estado !== 'pendiente') {
-      return res.status(400).json({ message: 'Solo se pueden editar eventos pendientes' });
-    }
-    
-    const eventoActualizado = await Evento.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      { new: true }
-    ).populate('usuario', 'name email');
-    
-    res.json(eventoActualizado);
-  } catch (error) {
-    res.status(400).json({ message: error.message });
-  }
-});
-
-// Eliminar un evento (solo el dueño puede eliminar eventos pendientes)
+// Eliminar un evento (dueño o admin)
 router.delete('/:id', auth, async (req, res) => {
   try {
     const evento = await Evento.findById(req.params.id);
-    
     if (!evento) {
       return res.status(404).json({ message: 'Evento no encontrado' });
     }
-    
-    // Solo el dueño puede eliminar
-    if (evento.usuario.toString() !== req.userId) {
+
+    // Solo el dueño o un admin puede eliminarlo
+    if (req.userRole !== 'admin' && evento.usuario.toString() !== req.userId) {
       return res.status(403).json({ message: 'No autorizado para eliminar este evento' });
     }
-    
-    // Solo se pueden eliminar eventos pendientes o rechazados
-    if (!['pendiente', 'rechazado'].includes(evento.estado)) {
-      return res.status(400).json({ message: 'Solo se pueden eliminar eventos pendientes o rechazados' });
-    }
-    
-    await Evento.findByIdAndDelete(req.params.id);
-    res.json({ message: 'Evento eliminado' });
+
+    await evento.remove();
+    res.json({ message: 'Evento eliminado correctamente' });
   } catch (error) {
+    console.error('Error eliminando evento:', error);
     res.status(500).json({ message: error.message });
   }
 });
