@@ -1,0 +1,90 @@
+.new-event-container {
+  min-height: 100vh;
+  background: linear-gradient(to bottom right, #f0fdf4, #ffffff);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
+}
+
+.new-event-card {
+  width: 100%;
+  max-width: 600px;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 1rem;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+}
+
+.new-event-header {
+  background-color: #22c55e;
+  color: white;
+  padding: 2rem;
+  text-align: center;
+}
+
+.new-event-header h1 {
+  margin: 0;
+  font-size: 1.75rem;
+}
+
+.new-event-form {
+  padding: 2rem;
+}
+
+.new-event-form .field {
+  margin-bottom: 1.5rem;
+}
+
+.new-event-form label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: #334155;
+}
+
+.new-event-form input,
+.new-event-form select,
+.new-event-form textarea {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  background: #fff;
+  transition: border 0.2s ease;
+}
+
+.new-event-form input:focus,
+.new-event-form select:focus,
+.new-event-form textarea:focus {
+  border-color: #22c55e;
+  outline: none;
+}
+
+.new-event-button {
+  display: block;
+  width: 100%;
+  padding: 1rem;
+  background-color: #22c55e;
+  color: white;
+  font-weight: bold;
+  border: none;
+  border-radius: 0.5rem;
+  transition: background 0.3s ease;
+}
+
+.new-event-button:hover {
+  background-color: #16a34a;
+}
+
+.new-event-error {
+  background: #fee2e2;
+  border: 1px solid #fca5a5;
+  color: #b91c1c;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
