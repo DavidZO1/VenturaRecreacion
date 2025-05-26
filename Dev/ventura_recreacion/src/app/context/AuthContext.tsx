@@ -1,12 +1,12 @@
-// src/app/context/AuthContext.tsx
 "use client";
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { API_BASE_URL } from '../config'; // Ajusta ruta si usas otro path
+import { API_BASE_URL } from '../config';
 
 type User = {
   _id: string;
   name: string;
   email: string;
+  role: string;
   availability: string[];
   token: string;
   createdAt: string;
@@ -18,6 +18,7 @@ type AuthContextType = {
   register: (name: string, email: string, password: string) => Promise<void>;
   logout: () => void;
   isLoading: boolean;
+  isAdmin: boolean;
 };
 
 const AuthContext = createContext<AuthContextType>({} as AuthContextType);
@@ -40,7 +41,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setIsLoading(false);
       }
     };
-
     loadUser();
   }, []);
 
@@ -63,10 +63,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(userData);
       return userData;
     } catch (error) {
-      if (error instanceof Error) {
-        throw new Error(error.message);
-      }
-      throw new Error('Error desconocido en el inicio de sesión');
+      throw new Error(error instanceof Error ? error.message : 'Error desconocido');
     } finally {
       setIsLoading(false);
     }
@@ -91,10 +88,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(userData);
       return userData;
     } catch (error) {
-      if (error instanceof Error) {
-        throw new Error(error.message);
-      }
-      throw new Error('Error desconocido en el registro');
+      throw new Error(error instanceof Error ? error.message : 'Error desconocido');
     } finally {
       setIsLoading(false);
     }
@@ -105,8 +99,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null);
   };
 
+  const isAdmin = user?.role === 'admin';
+
   return (
-    <AuthContext.Provider value={{ user, login, register, logout, isLoading }}>
+    <AuthContext.Provider value={{ user, login, register, logout, isLoading, isAdmin }}>
       {children}
     </AuthContext.Provider>
   );

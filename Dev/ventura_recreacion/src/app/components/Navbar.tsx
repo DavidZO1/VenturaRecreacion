@@ -11,9 +11,8 @@ export default function Navbar() {
         <header className="navbar">
             <div className="navbar-container">
                 <Link href="/" className="logo" aria-label="Inicio">
-  <img src="/logo.png" alt="Logo Ventura" className="logo-image" />
-</Link>
-
+                    <img src="/logo.png" alt="Logo Ventura" className="logo-image" />
+                </Link>
 
                 <nav>
                     <ul className="nav-menu">
@@ -27,10 +26,18 @@ export default function Navbar() {
                                 <li><Link href="/login">Iniciar Sesión</Link></li>
                                 <li><Link href="/registro">Registro</Link></li>
                             </>
-                        )}
-                        <li><Link href="/eventos">Eventos</Link></li>
-                        <li><Link href="/servicios">Servicios</Link></li>                        
+                        )}                        
+                        <li><Link href="/servicios">Servicios</Link></li>
                         <li><Link href="/pagos">Pagos</Link></li>
+                        
+                        {user && (
+                            <>
+                                <li><Link href="/eventos">Mis Eventos</Link></li>
+                                {user.isAdmin && (
+                                    <li><Link href="/admin">Panel Admin</Link></li>
+                                )}
+                            </>
+                        )}
                     </ul>
                 </nav>
             </div>
