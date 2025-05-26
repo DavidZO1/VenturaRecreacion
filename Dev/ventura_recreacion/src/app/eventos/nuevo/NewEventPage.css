@@ -9,7 +9,7 @@
 
 .new-event-card {
   width: 100%;
-  max-width: 600px;
+  max-width: 1000px;
   background: #fff;
   border: 1px solid #e2e8f0;
   border-radius: 1rem;
@@ -18,8 +18,8 @@
 }
 
 .new-event-header {
-  background-color: #22c55e;
-  color: white;
+  background-color: rgb(255, 215, 0);
+  color: rgb(0, 0, 0);
   padding: 2rem;
   text-align: center;
 }
@@ -59,7 +59,7 @@
 .new-event-form input:focus,
 .new-event-form select:focus,
 .new-event-form textarea:focus {
-  border-color: #22c55e;
+  border-color: #e0bb00;
   outline: none;
 }
 
@@ -67,8 +67,8 @@
   display: block;
   width: 100%;
   padding: 1rem;
-  background-color: #22c55e;
-  color: white;
+  background-color: rgb(255, 215, 0);
+  color: rgb(0, 0, 0);
   font-weight: bold;
   border: none;
   border-radius: 0.5rem;
@@ -76,7 +76,7 @@
 }
 
 .new-event-button:hover {
-  background-color: #16a34a;
+  background-color: #e0bb00;
 }
 
 .new-event-error {
