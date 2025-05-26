@@ -128,9 +128,17 @@ export default function MisEventosPage() {
                   </>
                 )}
                 {evento.estado === 'aprobado' && (
-                  <span className="text-green-600 text-sm">
-                    Evento aprobado - Esperando pago
-                  </span>
+                  <div className="aprobado-actions">
+                    <span className="text-green-600">
+                      Aprobado - Precio: ${evento.precio}
+                    </span>
+                    <Link
+                      href={`/pagos?eventoId=${evento._id}&monto=${evento.precio}`}
+                      className="btn-pagar"
+                    >
+                      Realizar Pago
+                    </Link>
+                  </div>
                 )}
                 {evento.estado === 'pagado' && (
                   <span className="text-blue-600 text-sm">

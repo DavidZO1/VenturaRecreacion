@@ -48,11 +48,11 @@ export default function EditEventPage({ params }: PageProps) {
         try {
             const evento = await fetchEvento(params.id, user!.token);
             
-            // Verificar que el usuario puede editar este evento
-            if (evento.usuario._id !== user!.userId && user!.role !== 'admin') {
-                setError('No tienes permisos para editar este evento');
-                return;
-            }
+            // Verificación corregida
+        if (evento.usuario._id !== user!._id && user!.role !== 'admin') {
+            setError('No tienes permisos para editar este evento');
+            return;
+        }
             
             // Verificar que el evento se puede editar
             if (evento.estado !== 'pendiente') {

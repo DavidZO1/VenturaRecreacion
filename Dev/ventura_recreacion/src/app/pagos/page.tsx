@@ -1,22 +1,30 @@
 "use client";
 import "./PagosPage.css";
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Elements } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
 import CheckoutForm from '../components/checkout-form';
 import { useAuth } from '../context/AuthContext';
+import { useSearchParams } from 'next/navigation';
 
-// Cargar Stripe fuera del componente para evitar recargas innecesarias
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PK!);
 
 export default function Pagos() {
   const [showPaymentForm, setShowPaymentForm] = useState(false);
-  const [amount, setAmount] = useState(1000); // Monto predeterminado: $10.00
+  const [amount, setAmount] = useState(0);
   const { user } = useAuth();
+  const searchParams = useSearchParams();
+  const eventoId = searchParams?.get('eventoId');
+
+  useEffect(() => {
+    const montoAprobado = searchParams?.get('monto');
+    if (montoAprobado) {
+      setAmount(Number(montoAprobado) * 100); // Convertir a centavos
+    }
+  }, [searchParams]);
 
   const handleShowPaymentForm = () => {
     if (!user) {
-      // Si el usuario no está autenticado, redirigir al login
       alert("Por favor inicia sesión para continuar con el pago");
       window.location.href = "/login";
       return;
@@ -37,26 +45,31 @@ export default function Pagos() {
               <img src="/credit-card.png" alt="Tarjetas" />
               <span>Tarjetas de Crédito/Débito</span>
             </div>
-            <div className="metodo-item">
-              <img src="/paypal.png" alt="PayPal" />
-              <span>PayPal</span>
-            </div>
+            
             
             <div className="monto-selector">
-              <label htmlFor="monto">Monto a pagar (COP):</label>
+              <label htmlFor="monto">Monto a pagar (MXN):</label>
               <select 
                 id="monto" 
                 value={amount} 
                 onChange={(e) => setAmount(Number(e.target.value))}
                 className="select-monto"
+                disabled={!!eventoId}
               >
-                <option value={1000}>$10.000</option>
-                <option value={5000}>$50.000</option>
-                <option value={10000}>$100.000</option>
-                <option value={50000}>$1.000.000</option>
-                <option value={50000}>$1.200.000</option>
-                <option value={50000}>$1.500.000</option>
+                {!eventoId && (
+                  <>
+                    <option value={10000}>$100.00</option>
+                    <option value={50000}>$500.00</option>
+                    <option value={100000}>$1,000.00</option>
+                  </>
+                )}
+                <option value={amount}>${(amount/100).toFixed(2)}</option>
               </select>
+              {eventoId && (
+                <p className="info-monto">
+                  Monto fijado por evento aprobado
+                </p>
+              )}
             </div>
             
             <button 
@@ -70,9 +83,12 @@ export default function Pagos() {
       ) : (
         <div className="pago-form-container">
           <div className="pago-card">
-            <h2>Realizar Pago de ${amount/100}</h2>
+            <h2>Pagar ${(amount/100).toFixed(2)}</h2>
             <Elements stripe={stripePromise}>
-              <CheckoutForm amount={amount} />
+              <CheckoutForm 
+                amount={amount} 
+                eventoId={eventoId || ''}
+              />
             </Elements>
             <button 
               className="boton-secundario" 

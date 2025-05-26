@@ -2,11 +2,18 @@
 import { CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { useRouter } from 'next/navigation';
 
-const CheckoutForm = ({ amount }: { amount: number }) => {
+interface CheckoutFormProps {
+  amount: number;
+  eventoId: string;
+}
+
+const CheckoutForm = ({ amount, eventoId }: CheckoutFormProps) => {
     const stripe = useStripe();
     const elements = useElements();
     const { user } = useAuth();
+    const router = useRouter();
     const [isProcessing, setIsProcessing] = useState(false);
     const [paymentStatus, setPaymentStatus] = useState<string | null>(null);
 
@@ -24,22 +31,23 @@ const CheckoutForm = ({ amount }: { amount: number }) => {
         try {
             // 1. Crear intent de pago
             const paymentIntentResponse = await fetch(
-                `${process.env.NEXT_PUBLIC_API_URL}/api/payments/create-payment-intent`, 
-                {
-                    method: 'POST',
-                    headers: { 
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${user.token}`
-                    },
-                    body: JSON.stringify({ 
-                        amount,
-                        metadata: {
-                            userId: user._id,
-                            email: user.email
-                        }
-                    })
-                }
-            );
+    `${process.env.NEXT_PUBLIC_API_URL}/api/payments/create-payment-intent`, 
+    {
+        method: 'POST',
+        headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${user.token}`
+        },
+        body: JSON.stringify({ 
+            amount,
+            metadata: {
+                userId: user._id, // Corregido de userId a _id
+                email: user.email,
+                eventoId: eventoId
+            }
+        })
+    }
+);
 
             if (!paymentIntentResponse.ok) {
                 throw new Error('Error al crear el intent de pago');
@@ -64,9 +72,15 @@ const CheckoutForm = ({ amount }: { amount: number }) => {
             if (error) {
                 setPaymentStatus(`Error: ${error.message}`);
             } else if (paymentIntent?.status === 'succeeded') {
-                setPaymentStatus('¡Pago exitoso! Gracias por tu compra.');
-                // Aquí podrías realizar alguna acción adicional como actualizar la UI
-                // o redirigir a una página de confirmación
+                setPaymentStatus('¡Pago exitoso! Redirigiendo...');
+                // Actualizar estado del evento
+                await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/eventos/${eventoId}/pagado`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Authorization': `Bearer ${user.token}`
+                    }
+                });
+                router.push('/eventos');
             } else {
                 setPaymentStatus(`Estado del pago: ${paymentIntent?.status}`);
             }
