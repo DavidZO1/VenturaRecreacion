@@ -28,14 +28,13 @@ export default function Navbar() {
                             </>
                         )}                        
                         <li><Link href="/servicios">Servicios</Link></li>
-                        <li><Link href="/pagos">Pagos</Link></li>
+                        
                         
                         {user && (
                             <>
                                 <li><Link href="/eventos">Mis Eventos</Link></li>
-                                {user.isAdmin && (
-                                    <li><Link href="/admin">Panel Admin</Link></li>
-                                )}
+                                <li><Link href="/pagos">Pagos</Link></li>
+                                {user?.role === 'admin' && <li><Link href="/admin">Panel Admin</Link></li>}
                             </>
                         )}
                     </ul>
