@@ -1,0 +1,118 @@
+.admin-panel {
+  padding: 2rem;
+  max-width: 96rem;
+  margin: 0 auto;
+}
+
+.admin-tabs {
+  display: flex;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid #ccc;
+}
+
+.admin-tab {
+  padding: 0.5rem 1rem;
+  margin-right: 1rem;
+  cursor: pointer;
+  color: #666;
+  border: none;
+  background: none;
+}
+
+.admin-tab.active {
+  border-bottom: 2px solid #3b82f6;
+  color: #2563eb;
+  font-weight: 600;
+}
+
+.evento-card {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 1rem;
+  background-color: white;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  margin-bottom: 1rem;
+}
+
+.evento-card h3 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #2563eb;
+}
+
+.evento-status {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border-radius: 4px;
+}
+
+.evento-status.aprobado {
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+.evento-status.pagado {
+  background-color: #dbeafe;
+  color: #1e40af;
+}
+
+.evento-status.otro {
+  background-color: #f3f4f6;
+  color: #374151;
+}
+
+.controles {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.input {
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  flex: 1;
+}
+
+.btn {
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  border: none;
+  background-color: #e5e7eb;
+}
+
+.btn:hover {
+  background-color: #d1d5db;
+}
+
+.btn-green {
+  background-color: #10b981;
+  color: white;
+}
+
+.btn-green:hover {
+  background-color: #059669;
+}
+
+.btn-red {
+  background-color: #ef4444;
+  color: white;
+}
+
+.btn-red:hover {
+  background-color: #dc2626;
+}
+
+.text-muted {
+  color: #6b7280;
+}
+
+.agenda-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
