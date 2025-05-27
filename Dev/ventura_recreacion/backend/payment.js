@@ -40,7 +40,7 @@ router.post('/create-payment-intent', auth, async (req, res) => {
     console.log('🔢 Procesando monto:', {
       original: amount,
       procesado: amountInCOP,
-      moneda: 'COP'
+      moneda: 'cop'
     });
     
     // Validar monto mínimo (equivalente a ~$0.50 USD)
