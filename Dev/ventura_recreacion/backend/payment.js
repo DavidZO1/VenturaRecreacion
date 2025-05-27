@@ -22,6 +22,21 @@ const auth = async (req, res, next) => {
   }
 };
 
+// FUNCIÓN AUXILIAR: Convertir COP a la unidad que Stripe espera
+function convertCOPForStripe(amountInCOP) {
+  // Para COP, Stripe espera el monto en pesos (no centavos)
+  // Pero internamente lo trata como si fuera centavos
+  // Por eso debemos multiplicar por 100 para que Stripe lo interprete correctamente
+  return Math.round(Number(amountInCOP) * 100);
+}
+
+// FUNCIÓN AUXILIAR: Convertir de Stripe COP a COP real
+function convertStripeAmountToCOP(stripeAmount) {
+  // Stripe nos devuelve el monto multiplicado por 100
+  // Dividimos por 100 para obtener el monto real en COP
+  return Math.round(stripeAmount / 100);
+}
+
 // Crear intent de pago - CORREGIDO PARA COP
 router.post('/create-payment-intent', auth, async (req, res) => {
   try {
@@ -33,18 +48,10 @@ router.post('/create-payment-intent', auth, async (req, res) => {
       return res.status(400).json({ message: 'Se requiere un monto válido' });
     }
 
-    // CRÍTICO: Para COP, NO dividir por 100
-    // COP no tiene centavos, por lo que 10000 COP = 10000 (no 10000/100)
-    const amountInCOP = Math.round(Number(amount)); // Convertir a número entero
+    // Convertir a número entero en COP
+    const amountInCOP = Math.round(Number(amount));
     
-    console.log('🔢 Procesando monto:', {
-      original: amount,
-      procesado: amountInCOP,
-      moneda: 'cop'
-    });
-    
-    // Validar monto mínimo (equivalente a ~$0.50 USD)
-    // Para que 50 centavos USD funcionen con COP, necesitamos al menos ~2000 COP
+    // Validar monto mínimo en COP real (2000 COP = ~$0.50 USD)
     const MIN_AMOUNT_COP = 2000;
     if (amountInCOP < MIN_AMOUNT_COP) {
       console.error(`❌ Monto muy pequeño: ${amountInCOP} COP (mínimo: ${MIN_AMOUNT_COP} COP)`);
@@ -55,18 +62,23 @@ router.post('/create-payment-intent', auth, async (req, res) => {
       });
     }
 
-    console.log(`💰 Creando PaymentIntent por ${amountInCOP} COP`);
+    // CRÍTICO: Convertir COP para Stripe (multiplicar por 100)
+    const stripeAmount = convertCOPForStripe(amountInCOP);
+    
+    console.log(`💰 Procesando pago:`, {
+      montoOriginal: amountInCOP + ' COP',
+      montoParaStripe: stripeAmount,
+      explicacion: 'Stripe espera COP * 100 para procesamiento interno'
+    });
 
-    // CORREGIDO: Pasar el monto exacto sin modificaciones
     const paymentIntent = await stripe.paymentIntents.create({
-      amount: amountInCOP, // ✅ Monto exacto en COP (SIN dividir por 100)
-      currency: 'COP', // ✅ Moneda peso colombiano
+      amount: stripeAmount, // Monto convertido para Stripe
+      currency: 'COP',
       metadata: {
         userId: req.userId,
-        originalAmount: amountInCOP, // Para debugging
+        originalAmountCOP: amountInCOP, // Guardamos el monto real para referencia
         ...metadata
       },
-      // Configuraciones específicas para Colombia
       payment_method_types: ['card'],
       statement_descriptor_suffix: 'EVENTOS',
       receipt_email: metadata.userEmail,
@@ -74,7 +86,8 @@ router.post('/create-payment-intent', auth, async (req, res) => {
 
     console.log(`✅ PaymentIntent creado exitosamente:`, {
       id: paymentIntent.id,
-      amount: paymentIntent.amount,
+      stripeAmount: paymentIntent.amount,
+      realAmountCOP: amountInCOP,
       currency: paymentIntent.currency,
       status: paymentIntent.status
     });
@@ -82,24 +95,24 @@ router.post('/create-payment-intent', auth, async (req, res) => {
     res.json({ 
       clientSecret: paymentIntent.client_secret,
       id: paymentIntent.id,
-      amount: paymentIntent.amount, // Esto debería ser igual a amountInCOP
+      amount: amountInCOP, // Devolvemos el monto real en COP
+      stripeAmount: paymentIntent.amount, // Para debugging
       currency: paymentIntent.currency
     });
 
   } catch (error) {
     console.error('🔥 Error en create-payment-intent:', error);
     
-    // Manejar errores específicos de Stripe
     if (error.code === 'amount_too_small') {
       console.error('💸 Error: Monto demasiado pequeño para Stripe');
       return res.status(400).json({ 
         message: 'El monto es demasiado pequeño para procesar internacionalmente. Mínimo 2000 COP.',
         stripeError: error.message,
-        receivedAmount: req.body.amount
+        receivedAmount: req.body.amount,
+        explanation: 'Stripe requiere que el monto equivalga a al menos $0.50 USD'
       });
     }
     
-    // Log adicional para debugging
     console.error('Error details:', {
       code: error.code,
       type: error.type,
@@ -114,7 +127,7 @@ router.post('/create-payment-intent', auth, async (req, res) => {
   }
 });
 
-// Webhook mejorado con logs de depuración
+// Webhook mejorado para manejar montos de COP correctamente
 router.post('/webhook', express.raw({type: 'application/json'}), async (req, res) => {
   const sig = req.headers['stripe-signature'];
   
@@ -135,33 +148,43 @@ router.post('/webhook', express.raw({type: 'application/json'}), async (req, res
     switch (event.type) {
       case 'payment_intent.succeeded':
         const paymentIntent = event.data.object;
+        
+        // CRÍTICO: Convertir el monto de Stripe de vuelta a COP real
+        const realAmountCOP = convertStripeAmountToCOP(paymentIntent.amount);
+        
         console.log(`💰 Pago exitoso:`, {
           id: paymentIntent.id,
-          amount: paymentIntent.amount,
+          stripeAmount: paymentIntent.amount,
+          realAmountCOP: realAmountCOP,
           currency: paymentIntent.currency.toUpperCase(),
-          metadata: paymentIntent.metadata
+          originalFromMetadata: paymentIntent.metadata.originalAmountCOP
         });
         
-        // 1. Guardar en la colección Payment
+        // Usar el monto original guardado en metadata si está disponible
+        const finalAmount = paymentIntent.metadata.originalAmountCOP 
+          ? parseInt(paymentIntent.metadata.originalAmountCOP)
+          : realAmountCOP;
+        
         const newPayment = new Payment({
           userId: paymentIntent.metadata.userId,
           eventoId: paymentIntent.metadata.eventoId || null,
-          amount: paymentIntent.amount, // Monto en COP
-          currency: paymentIntent.currency.toUpperCase(), // 'COP'
+          amount: finalAmount, // Monto real en COP
+          currency: paymentIntent.currency.toUpperCase(),
           status: 'succeeded',
           paymentIntentId: paymentIntent.id,
           metadata: {
             platform: paymentIntent.metadata.platform || 'web',
             userEmail: paymentIntent.metadata.userEmail,
             userName: paymentIntent.metadata.userName,
-            originalAmount: paymentIntent.metadata.originalAmount
+            originalAmountCOP: finalAmount,
+            stripeAmount: paymentIntent.amount // Para debugging
           }
         });
         
         await newPayment.save();
         console.log('📄 Pago guardado en DB:', newPayment._id);
 
-        // 2. Actualizar estado del evento si existe
+        // Actualizar estado del evento si existe
         if (paymentIntent.metadata.eventoId) {
           const updatedEvento = await Evento.findByIdAndUpdate(
             paymentIntent.metadata.eventoId,
@@ -180,18 +203,24 @@ router.post('/webhook', express.raw({type: 'application/json'}), async (req, res
 
       case 'payment_intent.payment_failed':
         const failedPayment = event.data.object;
+        const failedAmountCOP = convertStripeAmountToCOP(failedPayment.amount);
+        
         console.log(`❌ Pago fallido:`, {
           id: failedPayment.id,
-          amount: failedPayment.amount,
+          stripeAmount: failedPayment.amount,
+          realAmountCOP: failedAmountCOP,
           currency: failedPayment.currency,
           error: failedPayment.last_payment_error
         });
         
-        // Guardar el pago fallido
+        const finalFailedAmount = failedPayment.metadata.originalAmountCOP 
+          ? parseInt(failedPayment.metadata.originalAmountCOP)
+          : failedAmountCOP;
+        
         const failedPaymentRecord = new Payment({
           userId: failedPayment.metadata.userId,
           eventoId: failedPayment.metadata.eventoId || null,
-          amount: failedPayment.amount,
+          amount: finalFailedAmount,
           currency: failedPayment.currency.toUpperCase(),
           status: 'failed',
           paymentIntentId: failedPayment.id,
@@ -199,7 +228,8 @@ router.post('/webhook', express.raw({type: 'application/json'}), async (req, res
             platform: failedPayment.metadata.platform || 'web',
             userEmail: failedPayment.metadata.userEmail,
             userName: failedPayment.metadata.userName,
-            originalAmount: failedPayment.metadata.originalAmount,
+            originalAmountCOP: finalFailedAmount,
+            stripeAmount: failedPayment.amount,
             error: failedPayment.last_payment_error?.message
           }
         });
@@ -226,7 +256,7 @@ router.get('/history', auth, async (req, res) => {
       .sort({ createdAt: -1 });
 
     const formattedPayments = payments.map(p => ({
-      amount: p.amount, // Ya está en COP
+      amount: p.amount, // Ya está en COP real
       date: p.createdAt.toISOString(),
       status: p.status === 'succeeded' ? 'completado' : 
               p.status === 'failed' ? 'fallido' : 'pendiente',
@@ -246,6 +276,23 @@ router.get('/history', auth, async (req, res) => {
     console.error('Error fetching payment history:', error);
     res.status(500).json({ message: 'Error al obtener el historial' });
   }
+});
+
+// Endpoint de prueba para verificar conversiones
+router.get('/test-conversion/:amount', (req, res) => {
+  const amount = parseInt(req.params.amount);
+  const stripeAmount = convertCOPForStripe(amount);
+  const backToCOP = convertStripeAmountToCOP(stripeAmount);
+  
+  res.json({
+    originalCOP: amount,
+    forStripe: stripeAmount,
+    backToCOP: backToCOP,
+    explanation: {
+      toStripe: 'COP * 100 (Stripe espera centavos)',
+      fromStripe: 'StripeAmount / 100 (convertir de vuelta a COP)'
+    }
+  });
 });
 
 module.exports = router;

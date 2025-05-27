@@ -138,16 +138,28 @@ const CheckoutForm = ({ amount, eventoId }: CheckoutFormProps) => {
                 console.log('✅ Pago completado exitosamente:', paymentIntent.id);
                 setPaymentStatus(`¡Pago exitoso por ${amountInCOP.toLocaleString('es-CO')} COP! Redirigiendo...`);
                 
-                // Esperar un poco para que el webhook procese
-                await new Promise(resolve => setTimeout(resolve, 3000));
+                // CORREGIDO: Redirección más confiable
+                setTimeout(() => {
+                    try {
+                        if (eventoId) {
+                            console.log('🔄 Redirigiendo a eventos...');
+                            window.location.href = '/eventos';
+                        } else {
+                            console.log('🔄 Redirigiendo a historial de pagos...');
+                            window.location.href = '/pagos';
+                        }
+                    } catch (redirectError) {
+                        console.error('❌ Error en redirección:', redirectError);
+                        // Fallback: usar router.push
+                        if (eventoId) {
+                            router.push('/eventos');
+                        } else {
+                            router.push('/pagos');
+                        }
+                        router.refresh();
+                    }
+                }, 2000); // Reducido a 2 segundos para mejor UX
                 
-                // Redirigir según si hay evento o no
-                if (eventoId) {
-                    router.push('/eventos');
-                } else {
-                    router.push('/pagos');
-                }
-                router.refresh();
             } else if (paymentIntent?.status === 'requires_action') {
                 setPaymentStatus('El pago requiere autenticación adicional...');
                 // Stripe manejará automáticamente la autenticación 3D Secure si es necesaria
