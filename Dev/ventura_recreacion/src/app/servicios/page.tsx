@@ -54,7 +54,7 @@ export default function Servicios() {
     }
 
     localStorage.setItem('servicioContratado', JSON.stringify(servicio));
-    router.push(`/pagos?amount=${servicio.precio}`);
+    router.push('/eventos');
   };
 
   const handleAgregarComentario = () => {
