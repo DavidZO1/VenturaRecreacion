@@ -9,9 +9,18 @@ import { useSearchParams } from 'next/navigation';
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PK!);
 
+interface PaymentHistory {
+  amount: number;
+  date: string;
+  status: string;
+  eventoId?: string;
+}
+
 export default function Pagos() {
   const [showPaymentForm, setShowPaymentForm] = useState(false);
   const [amount, setAmount] = useState(0);
+  const [paymentHistory, setPaymentHistory] = useState<PaymentHistory[]>([]);
+  const [loadingHistory, setLoadingHistory] = useState(true);
   const { user } = useAuth();
   const searchParams = useSearchParams();
   const eventoId = searchParams?.get('eventoId');
@@ -19,14 +28,37 @@ export default function Pagos() {
   useEffect(() => {
     const montoAprobado = searchParams?.get('monto');
     if (montoAprobado) {
-      setAmount(Number(montoAprobado) * 100); // Convertir a centavos
+      setAmount(Number(montoAprobado));
     }
-  }, [searchParams]);
+    
+    if (user) {
+      fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/payments/history`, {
+        headers: {
+          'Authorization': `Bearer ${user.token}`
+        }
+      })
+      .then(res => {
+        if (!res.ok) throw new Error('Error al obtener el historial');
+        return res.json();
+      })
+      .then(data => setPaymentHistory(data))
+      .catch(error => {
+        console.error(error);
+        alert('Error al cargar el historial de pagos');
+      })
+      .finally(() => setLoadingHistory(false));
+    }
+  }, [searchParams, user]);
 
   const handleShowPaymentForm = () => {
     if (!user) {
       alert("Por favor inicia sesión para continuar con el pago");
       window.location.href = "/login";
+      return;
+    }
+    
+    if (amount <= 0) {
+      alert("Por favor ingresa un monto válido");
       return;
     }
     
@@ -46,25 +78,18 @@ export default function Pagos() {
               <span>Tarjetas de Crédito/Débito</span>
             </div>
             
-            
             <div className="monto-selector">
-              <label htmlFor="monto">Monto a pagar (MXN):</label>
-              <select 
-                id="monto" 
-                value={amount} 
+              <label htmlFor="monto">Monto a pagar (COP):</label>
+              <input
+                type="number"
+                id="monto"
+                value={amount}
                 onChange={(e) => setAmount(Number(e.target.value))}
-                className="select-monto"
+                className="input-monto"
                 disabled={!!eventoId}
-              >
-                {!eventoId && (
-                  <>
-                    <option value={10000}>$100.00</option>
-                    <option value={50000}>$500.00</option>
-                    <option value={100000}>$1,000.00</option>
-                  </>
-                )}
-                <option value={amount}>${(amount/100).toFixed(2)}</option>
-              </select>
+                min="1000"
+                step="100"
+              />
               {eventoId && (
                 <p className="info-monto">
                   Monto fijado por evento aprobado
@@ -79,14 +104,40 @@ export default function Pagos() {
               Pagar Ahora
             </button>
           </div>
+
+          <div className="historial-pagos">
+            <h2>Historial de Pagos</h2>
+            {loadingHistory ? (
+              <p>Cargando historial...</p>
+            ) : paymentHistory.length > 0 ? (
+              <div className="tabla-pagos">
+                <div className="encabezado">
+                  <span>Fecha</span>
+                  <span>Monto</span>
+                  <span>Estado</span>
+                  <span>Evento</span>
+                </div>
+                {paymentHistory.map((pago, index) => (
+                  <div className="fila" key={index}>
+                    <span>{new Date(pago.date).toLocaleDateString()}</span>
+                    <span>${pago.amount.toLocaleString()} COP</span>
+                    <span>{pago.status}</span>
+                    <span>{pago.eventoId || 'N/A'}</span>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p>No hay pagos registrados</p>
+            )}
+          </div>
         </div>
       ) : (
         <div className="pago-form-container">
           <div className="pago-card">
-            <h2>Pagar ${(amount/100).toFixed(2)}</h2>
+            <h2>Pagar ${amount.toLocaleString()} COP</h2>
             <Elements stripe={stripePromise}>
               <CheckoutForm 
-                amount={amount} 
+                amount={amount * 100}
                 eventoId={eventoId || ''}
               />
             </Elements>

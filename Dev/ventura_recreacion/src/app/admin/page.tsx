@@ -280,19 +280,7 @@ export default function AdminPanel() {
                       {evento.estado.toUpperCase()}
                     </span>
                     
-                    {evento.estado === 'aprobado' && (
-                      <button
-                        onClick={() => {
-                          if (confirm('¿Marcar este evento como pagado?')) {
-                            handleMarcarPagado(evento._id);
-                          }
-                        }}
-                        className="btn btn-green"
-                        style={{ fontSize: '0.875rem', padding: '0.25rem 0.5rem' }}
-                      >
-                        💳 Marcar Pagado
-                      </button>
-                    )}
+                    
                   </div>
                 </div>
               ))

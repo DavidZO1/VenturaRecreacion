@@ -1,4 +1,3 @@
-// backend/server.js
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
@@ -29,19 +28,15 @@ mongoose.connect(process.env.MONGODB_URI, {
 .then(() => console.log('MongoDB connected'))
 .catch(err => console.error('MongoDB error:', err));
 
-// Ruta básica
-app.get('/', (req, res) => {
-  res.send('API is running...');
-});
-
-console.log('paymentRoutes:', typeof paymentRoutes);
-console.log('userRoutes:', typeof userRoutes);
-console.log('eventoRoutes:', typeof eventoRoutes);
-
 // Rutas
 app.use('/api/payments', paymentRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/eventos', eventoRoutes);
+
+// Ruta básica
+app.get('/', (req, res) => {
+  res.send('API is running...');
+});
 
 // Iniciar servidor
 app.listen(PORT, () => {

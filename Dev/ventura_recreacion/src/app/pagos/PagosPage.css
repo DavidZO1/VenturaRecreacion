@@ -1,6 +1,6 @@
-/* app/pagos/PagosPage.css - Versión actualizada */
+/* app/pagos/PagosPage.css - Versión corregida */
 .pagos-page {
-  max-width: 800px;
+  max-width: 1000px;
   margin: 2rem auto;
   padding: 0 1rem;
 }
@@ -16,6 +16,7 @@
   border-radius: 8px;
   padding: 2rem;
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  margin-bottom: 2rem;
 }
 
 .metodo-item {
@@ -70,7 +71,7 @@
   margin: 1.5rem 0;
 }
 
-.select-monto {
+.input-monto {
   width: 100%;
   padding: 0.75rem;
   border: 1px solid #ddd;
@@ -93,7 +94,42 @@
   font-weight: 500;
 }
 
-/* Estilos para estados de pago */
+/* Historial de pagos */
+.historial-pagos {
+  margin-top: 2rem;
+  background: white;
+  border-radius: 8px;
+  padding: 2rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.tabla-pagos {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.encabezado {
+  font-weight: 600;
+  background: #f8f9fa;
+  padding: 1rem;
+  border-radius: 4px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+}
+
+.fila {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  align-items: center;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid #eee;
+}
+
+/* Estados de pago */
 .payment-status {
   margin-top: 1rem;
   padding: 1rem;

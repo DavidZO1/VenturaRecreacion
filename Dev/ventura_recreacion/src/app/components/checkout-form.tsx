@@ -29,31 +29,33 @@ const CheckoutForm = ({ amount, eventoId }: CheckoutFormProps) => {
         setPaymentStatus("Procesando pago...");
 
         try {
-            // 1. Crear intent de pago
+            // 1. Crear intent de pago con metadatos mejorados
             const paymentIntentResponse = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}/api/payments/create-payment-intent`, 
-    {
-        method: 'POST',
-        headers: { 
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${user.token}`
-        },
-        body: JSON.stringify({ 
-            amount,
-            metadata: {
-                userId: user._id, // Corregido de userId a _id
-                email: user.email,
-                eventoId: eventoId
-            }
-        })
-    }
-);
+                `${process.env.NEXT_PUBLIC_API_URL}/api/payments/create-payment-intent`, 
+                {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${user.token}`
+                    },
+                    body: JSON.stringify({ 
+                        amount: amount , // Convertir a centavos
+                        metadata: {
+                            userId: user._id,
+                            userEmail: user.email,
+                            eventoId: eventoId,
+                            platform: "web"
+                        }
+                    })
+                }
+            );
 
             if (!paymentIntentResponse.ok) {
-                throw new Error('Error al crear el intent de pago');
+                const errorData = await paymentIntentResponse.json();
+                throw new Error(errorData.message || 'Error al crear el intent de pago');
             }
 
-            const { clientSecret } = await paymentIntentResponse.json();
+            const { clientSecret, id: paymentIntentId } = await paymentIntentResponse.json();
 
             // 2. Confirmar el pago con Stripe
             const { error, paymentIntent } = await stripe.confirmCardPayment(
@@ -64,29 +66,33 @@ const CheckoutForm = ({ amount, eventoId }: CheckoutFormProps) => {
                         billing_details: {
                             name: user.name,
                             email: user.email,
+                            address: {
+                                city: "Bogotá", // Ejemplo de dato adicional
+                                country: "CO"
+                            }
                         }
-                    }
+                    },
+                    return_url: window.location.href // Para pagos que requieren redirección
                 }
             );
 
             if (error) {
-                setPaymentStatus(`Error: ${error.message}`);
-            } else if (paymentIntent?.status === 'succeeded') {
-                setPaymentStatus('¡Pago exitoso! Redirigiendo...');
-                // Actualizar estado del evento
-                await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/eventos/${eventoId}/pagado`, {
-                    method: 'PATCH',
-                    headers: {
-                        'Authorization': `Bearer ${user.token}`
-                    }
-                });
-                router.push('/eventos');
-            } else {
-                setPaymentStatus(`Estado del pago: ${paymentIntent?.status}`);
+                throw new Error(error.message || 'Error en la autenticación del pago');
             }
+
+            if (paymentIntent?.status === 'succeeded') {
+                setPaymentStatus('¡Pago exitoso! Redirigiendo...');
+                
+                // Esperar 2 segundos para permitir que el webhook procese
+                await new Promise(resolve => setTimeout(resolve, 2000));
+                
+                router.push('/eventos');
+                router.refresh(); // Forzar actualización de datos
+            }
+
         } catch (error) {
-            console.error('Error al procesar el pago:', error);
-            setPaymentStatus('Error al procesar el pago. Por favor intenta de nuevo.');
+            console.error('Error en el proceso de pago:', error);
+            setPaymentStatus(error instanceof Error ? error.message : 'Error desconocido');
         } finally {
             setIsProcessing(false);
         }
@@ -112,6 +118,7 @@ const CheckoutForm = ({ amount, eventoId }: CheckoutFormProps) => {
                                     color: '#9e2146',
                                 },
                             },
+                            hidePostalCode: true // Opción importante para Colombia
                         }}
                         className="p-3 border rounded"
                     />
@@ -122,9 +129,9 @@ const CheckoutForm = ({ amount, eventoId }: CheckoutFormProps) => {
                     disabled={!stripe || isProcessing}
                     className={`w-full py-2 px-4 rounded ${
                         isProcessing ? 'bg-gray-400' : 'bg-green-600 hover:bg-green-700'
-                    } text-white`}
+                    } text-white transition-all`}
                 >
-                    {isProcessing ? 'Procesando...' : `Pagar $${amount / 100}`}
+                    {isProcessing ? 'Procesando...' : `Pagar $${(amount / 100).toLocaleString('es-CO')} COP`}
                 </button>
             </form>
             

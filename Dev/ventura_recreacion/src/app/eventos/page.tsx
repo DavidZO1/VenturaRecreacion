@@ -113,12 +113,7 @@ export default function MisEventosPage() {
               <div className="evento-footer">
                 {evento.estado === 'pendiente' && (
                   <>
-                    <Link
-                      href={`/eventos/editar/${evento._id}`}
-                      className="btn-editar"
-                    >
-                      Editar
-                    </Link>
+                    
                     <button
                       onClick={() => handleDelete(evento._id)}
                       className="btn-eliminar"
